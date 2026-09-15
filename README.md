@@ -8,7 +8,7 @@ A production-grade, full-stack headless e-commerce system built with an N-tier m
 
 Velora Skin was engineered to solve common architectural pitfalls found in standard e-commerce builds: client-side price tampering, race conditions during flash sales, session hijacking via script injection, and slow Time-To-Interactive (TTI) caused by excessive database round-trips.
 
-
+```text
 ┌────────────────────────────────────────────────────────────────────────┐
 │                      CLIENT TIER (React 18 + Vite)                     │
 │  - Tailwind CSS Luxury Design System   - TanStack React Query v5 Cache │
@@ -39,7 +39,7 @@ Velora Skin was engineered to solve common architectural pitfalls found in stand
 │  - Atomic Document Manipulation ($inc, $gte)                           │
 └────────────────────────────────────────────────────────────────────────┘
 
-
+```
 
 
 ## Tech Stack
@@ -75,6 +75,7 @@ Velora Skin was engineered to solve common architectural pitfalls found in stand
 Order state mutations never rely on client-side browser redirects, preventing race conditions, incomplete transactions, or spoofed payloads. Stock decrements, order finalization, and digital invoice transmissions occur only after strict cryptographic verification of the raw webhook signature (`stripe.webhooks.constructEvent`).
 
 
+```text
 
 [Stripe Gateway] ──► POST /api/v1/orders/webhook ──► Verify Raw Signature
                                                           │
@@ -86,4 +87,4 @@ Order state mutations never rely on client-side browser redirects, preventing ra
    ├──► Atomic Stock Allocation ($inc)
    ├──► Mutate State: order.isPaid = true
    └──► Non-blocking Worker: Dispatch Pug HTML invoice via SMTP
-
+```
