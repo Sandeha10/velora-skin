@@ -41,3 +41,48 @@ Velora Skin was engineered to solve common architectural pitfalls found in stand
 
 
 
+
+## Tech Stack
+
+### Frontend
+![React](https://img.shields.io/badge/React_18-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
+![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)
+![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
+![TanStack Query](https://img.shields.io/badge/React_Query_v5-FF4154?style=for-the-badge&logo=react-query&logoColor=white)
+
+### Backend & Middleware
+![Node.js](https://img.shields.io/badge/Node.js_LTS-43853D?style=for-the-badge&logo=node.js&logoColor=white)
+![Express.js](https://img.shields.io/badge/Express_5-404D59?style=for-the-badge)
+![Stripe](https://img.shields.io/badge/Stripe_SDK-008CDD?style=for-the-badge&logo=stripe&logoColor=white)
+
+### Database & DevOps
+![MongoDB](https://img.shields.io/badge/MongoDB_7.0-4EA94B?style=for-the-badge&logo=mongodb&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker_Multi--stage-2496ED?style=for-the-badge&logo=docker&logoColor=white)
+![Nginx](https://img.shields.io/badge/Nginx_Alpine-009639?style=for-the-badge&logo=nginx&logoColor=white)
+
+| Layer | Technologies |
+| :--- | :--- |
+| **Frontend** | React 18, Vite, Tailwind CSS, TanStack React Query v5, Zustand, Framer Motion, Lucide Icons |
+| **Backend** | Node.js (ESM), Express 5, Mongoose, Nodemailer, Pug Engine, Stripe SDK |
+| **Database** | MongoDB 7.0 (Compound, Multi-key & Full-Text Search Indexes) |
+| **DevOps & Edge** | Docker, Docker Compose (Multi-stage builds), Nginx (Alpine), Gzip Compression |
+
+
+
+
+### Stripe Webhook Idempotency & Cryptographic Verification
+
+Order state mutations never rely on client-side browser redirects, preventing race conditions, incomplete transactions, or spoofed payloads. Stock decrements, order finalization, and digital invoice transmissions occur only after strict cryptographic verification of the raw webhook signature (`stripe.webhooks.constructEvent`).
+
+```text
+[Stripe Gateway] ──► POST /api/v1/orders/webhook ──► Verify Raw Signature
+                                                          │
+   ┌──────────────────────────────────────────────────────┴────────┐
+   ▼                                                               ▼
+[ Valid Signature ]                                       [ Invalid Signature ]
+   │                                                               │
+   ├──► Idempotency Guard: Check if Order already processed       └──► Reject immediately with 400 Bad Request
+   ├──► Atomic Stock Allocation ($inc)
+   ├──► Mutate State: order.isPaid = true
+   └──► Non-blocking Worker: Dispatch Pug HTML invoice via SMTP
+
