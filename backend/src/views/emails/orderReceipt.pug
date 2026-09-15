@@ -1,0 +1,35 @@
+extends baseEmail
+
+block content
+  h2(style='font-size: 18px; font-weight: 500; margin-bottom: 10px;') Order Confirmation — Ritual Complete
+  p(style='color: #78716C; font-size: 13px; margin-bottom: 25px;') Order Reference: ##{order._id}
+  p Thank you for your acquisition, #{firstName}. Your botanical formulations are being hand-prepared in small batches under strict laboratory standards.
+
+  table(style='width: 100%; border-collapse: collapse; margin: 25px 0; font-size: 13px;')
+    thead
+      tr(style='border-bottom: 1px solid #E7E5E4; text-align: left; text-transform: uppercase; letter-spacing: 0.1em; color: #78716C;')
+        th(style='padding: 10px 0;') Item
+        th(style='padding: 10px 0; text-align: center;') Qty
+        th(style='padding: 10px 0; text-align: right;') Total
+    tbody
+      each item in order.orderItems
+        tr(style='border-bottom: 1px solid #F5F5F4;')
+          td(style='padding: 12px 0;')
+            strong= item.title
+          td(style='padding: 12px 0; text-align: center;')= item.quantity
+          td(style='padding: 12px 0; text-align: right;') $#{(item.price * item.quantity).toFixed(2)}
+
+  div(style='border-top: 1px solid #E7E5E4; padding-top: 15px; margin-top: 15px;')
+    table(style='width: 100%; font-size: 13px;')
+      tr
+        td(style='color: #78716C;') Subtotal
+        td(style='text-align: right;') $#{order.itemsPrice.toFixed(2)}
+      tr
+        td(style='color: #78716C;') Carbon-Neutral Shipping
+        td(style='text-align: right;')= order.shippingPrice === 0 ? 'Complimentary' : `$${order.shippingPrice.toFixed(2)}`
+      tr(style='font-weight: 600; font-size: 15px;')
+        td(style='padding-top: 10px;') Total Charged
+        td(style='text-align: right; padding-top: 10px; color: #064E3B;') $#{order.totalPrice.toFixed(2)}
+
+  p(style='font-size: 12px; color: #78716C; margin-top: 30px;')
+    | Delivery Destination: #{order.shippingAddress.street}, #{order.shippingAddress.city}, #{order.shippingAddress.postalCode}, #{order.shippingAddress.country}

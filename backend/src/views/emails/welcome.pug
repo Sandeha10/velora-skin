@@ -1,0 +1,9 @@
+extends baseEmail
+
+block content
+  h2(style='font-size: 18px; font-weight: 500; margin-bottom: 15px;') Welcome to the Collective, #{firstName}.
+  p Thank you for beginning your journey with Velora Skin. We curate pure botanical formulations engineered with clinical precision.
+  p To secure your private profile and activate access to exclusive seasonal formulations, please verify your email address.
+  .btn-container
+    a.btn(href=`${url}`, target='_blank') Confirm Email Verification
+  p(style='font-size: 13px; color: #78716C;') This verification link remains valid for 24 hours. If you did not initiate this registration, please disregard this transmission.

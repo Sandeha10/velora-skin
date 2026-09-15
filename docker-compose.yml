@@ -1,0 +1,75 @@
+version: '3.8'
+
+services:
+  # 1. MongoDB Persistence Tier
+  mongodb:
+    image: mongo:7.0-jammy
+    container_name: velora_mongo
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER:-admin}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASS:-velora_secure_password_2026}
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - velora_internal_network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+  # 2. Node.js Express Application Tier
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: velora_backend
+    restart: always
+    environment:
+      NODE_ENV: production
+      PORT: 5000
+      CLIENT_URL: http://localhost
+      MONGO_URI: mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASS:-velora_secure_password_2026}@mongodb:27017/velora_skin_db?authSource=admin
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET}
+      JWT_ACCESS_EXPIRES_IN: 15m
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+      JWT_REFRESH_EXPIRES_IN: 7d
+      EMAIL_FROM: ${EMAIL_FROM}
+      EMAIL_HOST: ${EMAIL_HOST}
+      EMAIL_PORT: ${EMAIL_PORT}
+      EMAIL_USERNAME: ${EMAIL_USERNAME}
+      EMAIL_PASSWORD: ${EMAIL_PASSWORD}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET}
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - velora_internal_network
+    expose:
+      - "5000"
+
+  # 3. Nginx + React Web Tier (Edge Entry Point)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: /api/v1
+    container_name: velora_frontend
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - velora_internal_network
+
+volumes:
+  mongo_data:
+    driver: local
+
+networks:
+  velora_internal_network:
+    driver: bridge
